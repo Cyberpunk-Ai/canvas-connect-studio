@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, type Profile } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({
