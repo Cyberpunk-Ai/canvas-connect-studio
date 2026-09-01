@@ -137,10 +137,18 @@ function FeedPage() {
     e.preventDefault();
     if (!draft.trim() || !user) return;
     setPosting(true);
-    await supabase.from("posts").insert({ user_id: user.id, content: draft.trim() });
+    const { error } = await supabase
+      .from("posts")
+      .insert({ user_id: user.id, content: draft.trim() });
+    if (error) {
+      toast.error("Couldn't publish your post", { description: error.message });
+      setPosting(false);
+      return;
+    }
     setDraft("");
     await load();
     setPosting(false);
+    toast.success("Posted to your feed");
   }
 
   async function toggleLike(post: Post) {
@@ -158,10 +166,12 @@ function FeedPage() {
           : p
       )
     );
-    if (liked) {
-      await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", user.id);
-    } else {
-      await supabase.from("post_likes").insert({ post_id: post.id, user_id: user.id });
+    const { error } = liked
+      ? await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", user.id)
+      : await supabase.from("post_likes").insert({ post_id: post.id, user_id: user.id });
+    if (error) {
+      toast.error("Couldn't update your like");
+      await load();
     }
   }
 
